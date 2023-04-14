@@ -1,0 +1,7 @@
+## Interface: 100007
+## Version: 0.1
+## Title: Slab Components
+## Author: kaate#6234
+## Dependencies: Slab
+
+hp_numbers.lua
