@@ -5,3 +5,4 @@
 ## Dependencies: Slab
 
 hp_numbers.lua
+auras.lua
