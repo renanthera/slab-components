@@ -29,4 +29,8 @@ end
 function component:update(event)
 end
 
+function Slab.utils.enemies.isTrivial(unit)
+  return false
+end
+
 Slab.RegisterComponent('misc', component)
