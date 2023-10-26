@@ -6,3 +6,5 @@
 
 hp_numbers.lua
 auras.lua
+focus_target.lua
+misc.lua

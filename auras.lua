@@ -3,12 +3,14 @@ local Slab = LibStub("Slab")
 local HEIGHT = 24
 
 local debuff_whitelist = {
-  121253, -- Keg Smash
-  123725, -- Breath of Fire
+  -- 121253, -- Keg Smash
+  -- 123725, -- Breath of Fire
   386276, -- Bonedust Brew
-  312106, -- Weapons of Order
-  325153  -- Exploding keg
+  387179, -- Weapons of Order
+  -- 325153, -- Exploding keg
 }
+
+local position = 'TOPRIGHT'
 
 local component = {
     dependencies = {'healthBar'}
@@ -27,7 +29,13 @@ end
 local function creationFunc(pool)
   local frame = CreateFrame('Frame', pool.parent:GetName() .. 'Container')
   frame:SetSize(Slab.scale(HEIGHT), Slab.scale(HEIGHT))
-  frame:SetPoint('TOPRIGHT', pool.parent, 'TOP')
+
+  if position == 'TOPRIGHT' then
+    frame:SetPoint('BOTTOMRIGHT', pool.parent, 'BOTTOMRIGHT')
+  end
+  if position == 'BOTTOM' then
+    frame:SetPoint('TOPRIGHT', pool.parent, 'TOP')
+  end
 
   local cooldown = CreateFrame('Cooldown', pool.parent:GetName() .. 'Cooldown', frame, 'CooldownFrameTemplate')
   cooldown:SetAllPoints(frame)
@@ -37,7 +45,13 @@ local function creationFunc(pool)
   icon:SetAllPoints(frame)
 
   local text = frame:CreateFontString(pool.parent:GetName() .. 'Stacks', 'OVERLAY')
-  text:SetPoint('CENTER', frame, 'BOTTOM', 0, -1)
+
+  if position == 'TOPRIGHT' then
+    text:SetPoint('CENTER', frame, 'TOP', 0, 1) -- above
+  end
+  if position == 'BOTTOM' then
+    text:SetPoint('CENTER', frame, 'BOTTOM', 0, -1) -- below
+  end
   text:SetFont(Slab.font, Slab.scale(16), "OUTLINE")
 
   frame.icon = icon
@@ -49,6 +63,7 @@ end
 
 local function resetterFunc(_, frame)
   frame:Hide()
+  frame.text:SetText('')
 end
 
 ---@param slab Frame
@@ -58,7 +73,13 @@ function component:build(slab)
 
     local aura_container = CreateFrame('Frame', parent:GetName() .. 'AuraContainer', parent)
     aura_container:SetAllPoints(parent.bg)
-    aura_container:AdjustPointsOffset(0, Slab.scale(-1 * HEIGHT / 2 - 3))
+
+    if position == 'TOPRIGHT' then
+      aura_container:AdjustPointsOffset(0, Slab.scale(HEIGHT / 2 + 3)) -- above
+    end
+    if position == 'BOTTOM' then
+      aura_container:AdjustPointsOffset(0, Slab.scale(-1 * HEIGHT / 2 - 3)) -- below
+    end
 
     local texture_pool = CreateObjectPool(creationFunc, resetterFunc)
 
@@ -89,7 +110,9 @@ end
 
 function component:add_auras(settings, update)
   for _, aura in pairs(update) do
-    if aura['isFromPlayerOrPlayerPet'] and whitelist(aura['spellId'], debuff_whitelist) then
+    -- DevTools_Dump(aura)
+    if aura['sourceUnit'] == 'player' and whitelist(aura['spellId'], debuff_whitelist) then
+      -- DevTools_Dump(aura)
       local frame = self.frame.pool:Acquire()
       frame.cooldown:SetCooldownDuration(aura['duration'], aura['timeMod'])
       frame.icon:SetTexture(aura['icon'])
@@ -111,12 +134,17 @@ function component:update_auras(settings, update)
     local frame = find_aura(self.frame.pool, aura_instance_id, 'aura_instance_id')
     if frame then
       local aura = C_UnitAuras.GetAuraDataByAuraInstanceID(settings.tag, aura_instance_id)
-      frame.cooldown:SetCooldownDuration(aura['duration'], aura['timeMod'])
-      if aura['applications'] then
-        if aura['applications'] > 1 then
-          frame.text:SetText(aura['applications'])
-        elseif aura['applications'] < 2 then
-          frame.text:SetText('')
+      if aura then
+        if aura['sourceUnit'] == 'player' and whitelist(aura['spellId'], debuff_whitelist) then
+          -- DevTools_Dump(aura)
+          frame.cooldown:SetCooldownDuration(aura['duration'], aura['timeMod'])
+          if aura['applications'] then
+            if aura['applications'] > 1 then
+              frame.text:SetText(aura['applications'])
+            elseif aura['applications'] < 2 then
+              frame.text:SetText('')
+            end
+          end
         end
       end
     end
@@ -147,9 +175,15 @@ function component:sort_auras()
   table.sort(spellIDs)
   for index, spellID in ipairs(spellIDs) do
     local frame = find_aura(self.frame.pool, spellID, 'spell_id')
-    local odd = math.fmod(count, 2)
-    frame:ClearPointsOffset()
-    frame:AdjustPointsOffset(floor((index - count / 2) * Slab.scale(HEIGHT + 2)), 0)
+    if position == 'TOPRIGHT' then
+      frame:ClearPointsOffset()
+      frame:AdjustPointsOffset(floor(-1 * (index - 1) * Slab.scale(HEIGHT + 2) - 2), 0)
+    end
+    if position == 'BOTTOM' then
+      local odd = math.fmod(count, 2)
+      frame:ClearPointsOffset()
+      frame:AdjustPointsOffset(floor((index - count / 2) * Slab.scale(HEIGHT + 2)), 0)
+    end
   end
 end
 
