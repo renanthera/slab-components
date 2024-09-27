@@ -4,8 +4,8 @@ local HEIGHT = 24
 
 local debuff_whitelist = {
   -- 121253, -- Keg Smash
-  -- 123725, -- Breath of Fire
-  386276, -- Bonedust Brew
+  123725, -- Breath of Fire
+  -- 386276, -- Bonedust Brew
   387179, -- Weapons of Order
   -- 325153, -- Exploding keg
 }
