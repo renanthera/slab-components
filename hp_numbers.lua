@@ -13,7 +13,7 @@ local function format_thousands(number)
   if number < 1000 then
     return number
   end
-  local unit = ' kMGTPEZYRQ'
+  local unit = ' kMBGTPEZYRQ'
   local order = math.log10(number)
   local unit_index = math.floor(order / 3)
   local formatted_number = number / (10 ^ (unit_index * 3))

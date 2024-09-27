@@ -25,11 +25,18 @@ end
 function component:refresh_scale(settings)
 end
 
-
 function component:update(event)
 end
 
 function Slab.utils.enemies.isTrivial(unit)
+  return false
+end
+
+function Slab.utils.enemies.isMinor(unit)
+  return false
+end
+
+function Slab.componentRegistry.healthBar.smallMode(unit)
   return false
 end
 
